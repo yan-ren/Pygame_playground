@@ -1,8 +1,10 @@
 import pygame, sys
+import time
 
 # constant
 FPS = 60
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 # variables
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
@@ -16,6 +18,23 @@ car = pygame.image.load('./img/car1.png').convert_alpha()
 
 def place_car(x, y):
     display.blit(car, (x, y))
+
+
+def crash():
+    message_display('You Crashed!')
+
+
+def message_display(msg):
+    text_style = pygame.font.Font('freesansbold.ttf', 115)
+    text_surf = text_style.render(msg, True, BLACK)
+    text_rect = text_surf.get_rect()
+    text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    display.blit(text_surf, text_rect)
+    pygame.display.update()
+    time.sleep(2)
+
+    # start game again
+    game_loop()
 
 
 def game_loop():
@@ -42,7 +61,7 @@ def game_loop():
         x += x_change
 
         if x < 0 or x > (WINDOW_WIDTH - car.get_rect().width):
-            game_exit = True
+            crash()
         # print(event)
 
         display.fill(WHITE)
