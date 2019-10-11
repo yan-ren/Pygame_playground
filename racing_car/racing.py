@@ -17,6 +17,12 @@ clock = pygame.time.Clock()
 car = pygame.image.load('./img/car1.png').convert_alpha()
 
 
+def display_score(score):
+    font = pygame.font.SysFont(None, 25)
+    text = font.render("Score: " + str(score), True, BLACK)
+    display.blit(text, (0, 0))
+
+
 def draw_block(x, y, width, height, color):
     pygame.draw.rect(display, color,(x, y, width, height))
 
@@ -52,6 +58,7 @@ def game_loop():
     block_speed = 7
     block_width = 100
     block_height = 100
+    score = 0
 
     while not game_exit:
 
@@ -74,24 +81,26 @@ def game_loop():
         block_y += block_speed
 
         # movement variable handling
+        # car crashes on edge
         if car_x < 0 or car_x > (WINDOW_WIDTH - car.get_rect().width):
             crash()
             game_exit = True
-
+        # car crashes on blocks
         if car_y < block_y + block_height:
             if block_x < car_x < block_x + block_width or block_x < car_x + car.get_rect().width < block_x + block_width:
                 crash()
                 game_exit = True
-
-        # print(event)
+        # block passes car, initialize block position
         if block_y > WINDOW_HEIGHT:
             block_y = -WINDOW_HEIGHT
             block_x = random.randint(0, WINDOW_WIDTH)
+            score += 1
 
         # display
         display.fill(WHITE)
         place_car(car_x, car_y)
         draw_block(block_x, block_y, block_width, block_height, BLACK)
+        display_score(score)
         pygame.display.update()
 
         # FPS
