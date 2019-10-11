@@ -44,9 +44,9 @@ def message_display(msg):
 
 def game_loop():
     game_exit = False
-    x = WINDOW_WIDTH * 0.45
-    y = WINDOW_HEIGHT * 0.8
-    x_change = 0
+    car_x = WINDOW_WIDTH * 0.45
+    car_y = WINDOW_HEIGHT * 0.8
+    car_x_change = 0
     block_x = random.randint(0, WINDOW_WIDTH)
     block_y = -WINDOW_HEIGHT
     block_speed = 7
@@ -61,22 +61,27 @@ def game_loop():
                 game_exit = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    x_change = -5
+                    car_x_change = -5
                 elif event.key == pygame.K_RIGHT:
-                    x_change = 5
+                    car_x_change = 5
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT:
-                    x_change = 0
+                    car_x_change = 0
 
         # movement variable
-        x += x_change
+        car_x += car_x_change
         block_y += block_speed
 
         # movement variable handling
-        if x < 0 or x > (WINDOW_WIDTH - car.get_rect().width):
+        if car_x < 0 or car_x > (WINDOW_WIDTH - car.get_rect().width):
             crash()
             game_exit = True
+
+        if car_y < block_y + block_height:
+            if block_x < car_x < block_x + block_width or block_x < car_x + car.get_rect().width < block_x + block_width:
+                crash()
+                game_exit = True
 
         # print(event)
         if block_y > WINDOW_HEIGHT:
@@ -85,7 +90,7 @@ def game_loop():
 
         # display
         display.fill(WHITE)
-        place_car(x, y)
+        place_car(car_x, car_y)
         draw_block(block_x, block_y, block_width, block_height, BLACK)
         pygame.display.update()
 
