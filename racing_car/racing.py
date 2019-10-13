@@ -6,6 +6,10 @@ import random
 FPS = 60
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+DARK_RED = (200, 0, 0)
+GREEN = (0, 255, 0)
+DARK_GREEN = (0, 200, 0)
 # variables
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
@@ -50,6 +54,12 @@ def message_display(msg):
 
 def start_menu():
     game_exit = False
+    btn_width = 100
+    btn_height = 50
+    start_btn_x = WINDOW_WIDTH / 4
+    quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
+    start_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
+
 
     while not game_exit:
         # event handling
@@ -65,6 +75,19 @@ def start_menu():
         text_rect = text_surf.get_rect()
         text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
         display.blit(text_surf, text_rect)
+
+        mouse = pygame.mouse.get_pos()
+
+        if start_btn_x < mouse[0] < start_btn_x + btn_width and start_btn_y < mouse[1] < start_btn_y + btn_height:
+            pygame.draw.rect(display, GREEN, (start_btn_x, start_btn_y, btn_width, btn_height))
+        else:
+            pygame.draw.rect(display, DARK_GREEN, (start_btn_x, start_btn_y, btn_width, btn_height))
+
+        if quit_btn_x < mouse[0] < quit_btn_x + btn_width and quit_btn_y < mouse[1] < quit_btn_y + btn_height:
+            pygame.draw.rect(display, RED, (quit_btn_x, quit_btn_y, btn_width, btn_height))
+        else:
+            pygame.draw.rect(display, DARK_RED, (quit_btn_x, quit_btn_y, btn_width, btn_height))
+
         pygame.display.update()
 
         # FPS
