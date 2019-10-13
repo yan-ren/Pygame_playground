@@ -48,6 +48,29 @@ def message_display(msg):
     game_loop()
 
 
+def start_menu():
+    game_exit = False
+
+    while not game_exit:
+        # event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # display
+        display.fill(WHITE)
+        text_style = pygame.font.Font('freesansbold.ttf', 60)
+        text_surf = text_style.render("A Racing Car Game", True, BLACK)
+        text_rect = text_surf.get_rect()
+        text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+        display.blit(text_surf, text_rect)
+        pygame.display.update()
+
+        # FPS
+        clock.tick(FPS)
+
+
 def game_loop():
     game_exit = False
     car_x = WINDOW_WIDTH * 0.45
@@ -61,7 +84,6 @@ def game_loop():
     score = 0
 
     while not game_exit:
-
         # event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -107,6 +129,7 @@ def game_loop():
         clock.tick(FPS)
 
 
+start_menu()
 game_loop()
 pygame.quit()
 sys.exit()
