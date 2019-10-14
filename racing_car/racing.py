@@ -52,6 +52,21 @@ def message_display(msg):
     game_loop()
 
 
+def button(x, y, width, height, text, normal_color, hover_color):
+    mouse = pygame.mouse.get_pos()
+
+    if x < mouse[0] < x + width and y < mouse[1] < y + height:
+        pygame.draw.rect(display, hover_color, (x, y, width, height))
+    else:
+        pygame.draw.rect(display, normal_color, (x, y, width, height))
+
+    text_style = pygame.font.Font('freesansbold.ttf', 20)
+    text_surf = text_style.render(text, True, BLACK)
+    text_rect = text_surf.get_rect()
+    text_rect.center = (x + width / 2, y + height / 2)
+    display.blit(text_surf, text_rect)
+
+
 def start_menu():
     game_exit = False
     btn_width = 100
@@ -59,7 +74,6 @@ def start_menu():
     start_btn_x = WINDOW_WIDTH / 4
     quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
     start_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
-
 
     while not game_exit:
         # event handling
@@ -75,18 +89,8 @@ def start_menu():
         text_rect = text_surf.get_rect()
         text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
         display.blit(text_surf, text_rect)
-
-        mouse = pygame.mouse.get_pos()
-
-        if start_btn_x < mouse[0] < start_btn_x + btn_width and start_btn_y < mouse[1] < start_btn_y + btn_height:
-            pygame.draw.rect(display, GREEN, (start_btn_x, start_btn_y, btn_width, btn_height))
-        else:
-            pygame.draw.rect(display, DARK_GREEN, (start_btn_x, start_btn_y, btn_width, btn_height))
-
-        if quit_btn_x < mouse[0] < quit_btn_x + btn_width and quit_btn_y < mouse[1] < quit_btn_y + btn_height:
-            pygame.draw.rect(display, RED, (quit_btn_x, quit_btn_y, btn_width, btn_height))
-        else:
-            pygame.draw.rect(display, DARK_RED, (quit_btn_x, quit_btn_y, btn_width, btn_height))
+        button(start_btn_x, start_btn_y, btn_width, btn_height, "GO!", DARK_GREEN, GREEN)
+        button(quit_btn_x, quit_btn_y, btn_width, btn_height, "QUIT!", DARK_RED, RED)
 
         pygame.display.update()
 
