@@ -37,14 +37,41 @@ def place_car(x, y):
 
 def crash():
     message_display('You Crashed!')
-    time.sleep(2)
+    crashed = True
+    btn_width = 120
+    btn_height = 50
+    play_btn_x = WINDOW_WIDTH / 4
+    quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
+    play_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
+
+    message_display('You Crashed!')
+
+    while crashed:
+        # event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # display
+        clicked = button(play_btn_x, play_btn_y, btn_width, btn_height, "Play Again!", DARK_GREEN, GREEN)
+        if clicked:
+            crashed = False
+        clicked = button(quit_btn_x, quit_btn_y, btn_width, btn_height, "QUIT!", DARK_RED, RED)
+        if clicked:
+            pygame.quit()
+            sys.exit()
+        pygame.display.update()
+
+        # FPS
+        clock.tick(FPS)
 
     # start game again
     game_loop()
 
 
 def message_display(msg):
-    text_style = pygame.font.Font('freesansbold.ttf', 115)
+    text_style = pygame.font.Font('freesansbold.ttf', 100)
     text_surf = text_style.render(msg, True, BLACK)
     text_rect = text_surf.get_rect()
     text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
@@ -113,6 +140,14 @@ def pause():
     quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
     pause_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
 
+    # display.fill(WHITE)
+    # text_style = pygame.font.Font('freesansbold.ttf', 60)
+    # text_surf = text_style.render("Paused", True, BLACK)
+    # text_rect = text_surf.get_rect()
+    # text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    # display.blit(text_surf, text_rect)
+    message_display("Paused!")
+
     while paused:
         # event handling
         for event in pygame.event.get():
@@ -121,12 +156,6 @@ def pause():
                 sys.exit()
 
         # display
-        display.fill(WHITE)
-        text_style = pygame.font.Font('freesansbold.ttf', 60)
-        text_surf = text_style.render("Paused", True, BLACK)
-        text_rect = text_surf.get_rect()
-        text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-        display.blit(text_surf, text_rect)
         clicked = button(pause_btn_x, pause_btn_y, btn_width, btn_height, "Continue!", DARK_GREEN, GREEN)
         if clicked:
             paused = False
