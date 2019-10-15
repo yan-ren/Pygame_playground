@@ -37,6 +37,10 @@ def place_car(x, y):
 
 def crash():
     message_display('You Crashed!')
+    time.sleep(2)
+
+    # start game again
+    game_loop()
 
 
 def message_display(msg):
@@ -46,17 +50,16 @@ def message_display(msg):
     text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
     display.blit(text_surf, text_rect)
     pygame.display.update()
-    time.sleep(2)
-
-    # start game again
-    game_loop()
 
 
 def button(x, y, width, height, text, normal_color, hover_color):
     mouse = pygame.mouse.get_pos()
+    click = pygame.mouse.get_pressed()
 
     if x < mouse[0] < x + width and y < mouse[1] < y + height:
         pygame.draw.rect(display, hover_color, (x, y, width, height))
+        if click[0]:
+            return 1
     else:
         pygame.draw.rect(display, normal_color, (x, y, width, height))
 
@@ -68,14 +71,14 @@ def button(x, y, width, height, text, normal_color, hover_color):
 
 
 def start_menu():
-    game_exit = False
+    start_game = False
     btn_width = 100
     btn_height = 50
     start_btn_x = WINDOW_WIDTH / 4
     quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
     start_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
 
-    while not game_exit:
+    while not start_game:
         # event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -89,9 +92,48 @@ def start_menu():
         text_rect = text_surf.get_rect()
         text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
         display.blit(text_surf, text_rect)
-        button(start_btn_x, start_btn_y, btn_width, btn_height, "GO!", DARK_GREEN, GREEN)
-        button(quit_btn_x, quit_btn_y, btn_width, btn_height, "QUIT!", DARK_RED, RED)
+        clicked = button(start_btn_x, start_btn_y, btn_width, btn_height, "GO!", DARK_GREEN, GREEN)
+        if clicked:
+            start_game = True
+        clicked = button(quit_btn_x, quit_btn_y, btn_width, btn_height, "QUIT!", DARK_RED, RED)
+        if clicked:
+            pygame.quit()
+            sys.exit()
+        pygame.display.update()
 
+        # FPS
+        clock.tick(FPS)
+
+
+def pause():
+    paused = True
+    btn_width = 100
+    btn_height = 50
+    pause_btn_x = WINDOW_WIDTH / 4
+    quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
+    pause_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
+
+    while paused:
+        # event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # display
+        display.fill(WHITE)
+        text_style = pygame.font.Font('freesansbold.ttf', 60)
+        text_surf = text_style.render("Paused", True, BLACK)
+        text_rect = text_surf.get_rect()
+        text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+        display.blit(text_surf, text_rect)
+        clicked = button(pause_btn_x, pause_btn_y, btn_width, btn_height, "Continue!", DARK_GREEN, GREEN)
+        if clicked:
+            paused = False
+        clicked = button(quit_btn_x, quit_btn_y, btn_width, btn_height, "QUIT!", DARK_RED, RED)
+        if clicked:
+            pygame.quit()
+            sys.exit()
         pygame.display.update()
 
         # FPS
@@ -120,6 +162,8 @@ def game_loop():
                     car_x_change = -5
                 elif event.key == pygame.K_RIGHT:
                     car_x_change = 5
+                elif event.key == pygame.K_p:
+                    pause()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT:
