@@ -15,10 +15,13 @@ WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 
 pygame.init()
+crash_sound = pygame.mixer.Sound("Crash.wav")
+pygame.mixer.music.load("HandClap.mp3")
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('Race Car')
 clock = pygame.time.Clock()
 car = pygame.image.load('./img/car1.png').convert_alpha()
+pygame.display.set_icon(pygame.image.load('./img/car_icon.png').convert_alpha())
 
 
 def display_score(score):
@@ -36,7 +39,6 @@ def place_car(x, y):
 
 
 def crash():
-    message_display('You Crashed!')
     crashed = True
     btn_width = 120
     btn_height = 50
@@ -45,6 +47,8 @@ def crash():
     play_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
 
     message_display('You Crashed!')
+    pygame.mixer.music.stop()
+    pygame.mixer.Sound.play(crash_sound)
 
     while crashed:
         # event handling
@@ -140,6 +144,8 @@ def pause():
     quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
     pause_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
 
+    pygame.mixer.music.pause()
+
     # display.fill(WHITE)
     # text_style = pygame.font.Font('freesansbold.ttf', 60)
     # text_surf = text_style.render("Paused", True, BLACK)
@@ -168,6 +174,7 @@ def pause():
         # FPS
         clock.tick(FPS)
 
+    pygame.mixer.music.unpause()
 
 def game_loop():
     game_exit = False
@@ -180,6 +187,8 @@ def game_loop():
     block_width = 100
     block_height = 100
     score = 0
+
+    pygame.mixer.music.play(-1)
 
     while not game_exit:
         # event handling
