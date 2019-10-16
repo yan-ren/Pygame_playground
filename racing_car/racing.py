@@ -15,8 +15,8 @@ WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
 
 pygame.init()
-crash_sound = pygame.mixer.Sound("Crash.wav")
-pygame.mixer.music.load("HandClap.mp3")
+crash_sound = pygame.mixer.Sound("./Crash.wav")
+pygame.mixer.music.load("./HandClap.wav")
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('Race Car')
 clock = pygame.time.Clock()
@@ -175,6 +175,7 @@ def pause():
         clock.tick(FPS)
 
     pygame.mixer.music.unpause()
+
 
 def game_loop():
     game_exit = False
