@@ -10,6 +10,7 @@ RED = (255, 0, 0)
 DARK_RED = (200, 0, 0)
 GREEN = (0, 255, 0)
 DARK_GREEN = (0, 200, 0)
+SCORE_LIMIT = 50
 # variables
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
@@ -28,6 +29,12 @@ def display_score(score):
     font = pygame.font.SysFont(None, 25)
     text = font.render("Score: " + str(score), True, BLACK)
     display.blit(text, (0, 0))
+
+
+def display_level(level):
+    font = pygame.font.SysFont(None, 25)
+    text = font.render("Level: " + str(level), True, BLACK)
+    display.blit(text, (0, 30))
 
 
 def draw_block(x, y, width, height, color):
@@ -177,6 +184,19 @@ def pause():
     pygame.mixer.music.unpause()
 
 
+def calculate_level(score):
+    if score < 10:
+        return 1
+    elif 10 <= score < 20:
+        return 2
+    elif 20 <= score < 30:
+        return 3
+    elif 30 <= score < 40:
+        return 4
+    elif 40 <= score:
+        return 5
+
+
 def game_loop():
     game_exit = False
     car_x = WINDOW_WIDTH * 0.45
@@ -188,6 +208,7 @@ def game_loop():
     block_width = 100
     block_height = 100
     score = 0
+    level = 1
 
     pygame.mixer.music.play(-1)
 
@@ -210,7 +231,7 @@ def game_loop():
 
         # movement variable
         car_x += car_x_change
-        block_y += block_speed
+        block_y += block_speed * level
 
         # movement variable handling
         # car crashes on edge
@@ -227,12 +248,14 @@ def game_loop():
             block_y = -WINDOW_HEIGHT
             block_x = random.randint(0, WINDOW_WIDTH)
             score += 1
+            level = calculate_level(score)
 
         # display
         display.fill(WHITE)
         place_car(car_x, car_y)
         draw_block(block_x, block_y, block_width, block_height, BLACK)
         display_score(score)
+        display_level(level)
         pygame.display.update()
 
         # FPS
