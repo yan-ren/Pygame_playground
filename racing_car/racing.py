@@ -1,19 +1,7 @@
 import pygame, sys
-import time
 import random
-
-# constant
-FPS = 60
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-DARK_RED = (200, 0, 0)
-GREEN = (0, 255, 0)
-DARK_GREEN = (0, 200, 0)
-SCORE_LIMIT = 50
-# variables
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+from racing_car.constants import *
+from racing_car import utils
 
 pygame.init()
 crash_sound = pygame.mixer.Sound("./Crash.wav")
@@ -152,13 +140,6 @@ def pause():
     pause_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
 
     pygame.mixer.music.pause()
-
-    # display.fill(WHITE)
-    # text_style = pygame.font.Font('freesansbold.ttf', 60)
-    # text_surf = text_style.render("Paused", True, BLACK)
-    # text_rect = text_surf.get_rect()
-    # text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-    # display.blit(text_surf, text_rect)
     message_display("Paused!")
 
     while paused:
@@ -182,19 +163,6 @@ def pause():
         clock.tick(FPS)
 
     pygame.mixer.music.unpause()
-
-
-def calculate_level(score):
-    if score < 10:
-        return 1
-    elif 10 <= score < 20:
-        return 2
-    elif 20 <= score < 30:
-        return 3
-    elif 30 <= score < 40:
-        return 4
-    elif 40 <= score:
-        return 5
 
 
 def game_loop():
@@ -231,7 +199,7 @@ def game_loop():
 
         # movement variable
         car_x += car_x_change
-        block_y += block_speed * level
+        block_y += utils.calculate_speed(block_speed, level)
 
         # movement variable handling
         # car crashes on edge
@@ -248,7 +216,7 @@ def game_loop():
             block_y = -WINDOW_HEIGHT
             block_x = random.randint(0, WINDOW_WIDTH)
             score += 1
-            level = calculate_level(score)
+            level = utils.calculate_level(score)
 
         # display
         display.fill(WHITE)

@@ -10,7 +10,6 @@ A simple racing car game written in Python and PyGame
 - mp3 format is not working on Ubuntu, use wav instead
 
 ## Further Feature
-- structure the project, split .py to mutiple modules
 - introduce levels
     - increase speed depends on level
     - more functional blocks on different level, e.g some blocks get more score or slow the speed
@@ -18,5 +17,5 @@ A simple racing car game written in Python and PyGame
 - add highest score record
 
 ## Deployment Idea
-- convert to excutable for installing
-- or even perfect deploy online
+- convert to executable for installing
+- or even perfect, deploy online
