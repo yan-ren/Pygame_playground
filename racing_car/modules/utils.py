@@ -1,5 +1,5 @@
 # This module contains the utility functions in the game
-from racing_car import constants
+from modules import constants
 
 
 def calculate_level(score):

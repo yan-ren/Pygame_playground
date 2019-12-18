@@ -1,26 +1,26 @@
 import pygame, sys
 import random
-from racing_car.constants import *
-from racing_car import utils
+from modules.constants import *
+from modules import utils
 
 pygame.init()
-crash_sound = pygame.mixer.Sound("./Crash.wav")
-pygame.mixer.music.load("./HandClap.wav")
+crash_sound = pygame.mixer.Sound("audio/Crash.wav")
+pygame.mixer.music.load("audio/HandClap.wav")
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('Race Car')
 clock = pygame.time.Clock()
-car = pygame.image.load('./img/car1.png').convert_alpha()
-pygame.display.set_icon(pygame.image.load('./img/car_icon.png').convert_alpha())
+car = pygame.image.load('img/car1.png').convert_alpha()
+pygame.display.set_icon(pygame.image.load('img/car_icon.png').convert_alpha())
 
 
 def display_score(score):
-    font = pygame.font.SysFont(None, 25)
+    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
     text = font.render("Score: " + str(score), True, BLACK)
     display.blit(text, (0, 0))
 
 
 def display_level(level):
-    font = pygame.font.SysFont(None, 25)
+    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
     text = font.render("Level: " + str(level), True, BLACK)
     display.blit(text, (0, 30))
 
@@ -70,7 +70,7 @@ def crash():
 
 
 def message_display(msg):
-    text_style = pygame.font.Font('freesansbold.ttf', 100)
+    text_style = pygame.font.Font('fonts/freesansbold.ttf', 100)
     text_surf = text_style.render(msg, True, BLACK)
     text_rect = text_surf.get_rect()
     text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
@@ -89,7 +89,7 @@ def button(x, y, width, height, text, normal_color, hover_color):
     else:
         pygame.draw.rect(display, normal_color, (x, y, width, height))
 
-    text_style = pygame.font.Font('freesansbold.ttf', 20)
+    text_style = pygame.font.Font('fonts/freesansbold.ttf', 20)
     text_surf = text_style.render(text, True, BLACK)
     text_rect = text_surf.get_rect()
     text_rect.center = (x + width / 2, y + height / 2)
@@ -113,7 +113,7 @@ def start_menu():
 
         # display
         display.fill(WHITE)
-        text_style = pygame.font.Font('freesansbold.ttf', 60)
+        text_style = pygame.font.Font('fonts/freesansbold.ttf', 60)
         text_surf = text_style.render("A Racing Car Game", True, BLACK)
         text_rect = text_surf.get_rect()
         text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
