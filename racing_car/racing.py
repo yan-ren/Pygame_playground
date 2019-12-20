@@ -2,6 +2,8 @@ import pygame, sys
 import random
 from modules.constants import *
 from modules import utils
+from modules.car import Car
+from modules.block import Block
 
 pygame.init()
 crash_sound = pygame.mixer.Sound("audio/Crash.wav")
@@ -9,7 +11,7 @@ pygame.mixer.music.load("audio/HandClap.wav")
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('Race Car')
 clock = pygame.time.Clock()
-car = pygame.image.load('img/car1.png').convert_alpha()
+car1_img = pygame.image.load('img/car1.png').convert_alpha()
 pygame.display.set_icon(pygame.image.load('img/car_icon.png').convert_alpha())
 
 
@@ -25,48 +27,12 @@ def display_level(level):
     display.blit(text, (0, 30))
 
 
-def draw_block(x, y, width, height, color):
-    pygame.draw.rect(display, color,(x, y, width, height))
+def draw_block(block):
+    pygame.draw.rect(display, block.color, (block.x, block.y, block.width, block.height))
 
 
-def place_car(x, y):
-    display.blit(car, (x, y))
-
-
-def crash():
-    crashed = True
-    btn_width = 120
-    btn_height = 50
-    play_btn_x = WINDOW_WIDTH / 4
-    quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
-    play_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
-
-    message_display('You Crashed!')
-    pygame.mixer.music.stop()
-    pygame.mixer.Sound.play(crash_sound)
-
-    while crashed:
-        # event handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        # display
-        clicked = button(play_btn_x, play_btn_y, btn_width, btn_height, "Play Again!", DARK_GREEN, GREEN)
-        if clicked:
-            crashed = False
-        clicked = button(quit_btn_x, quit_btn_y, btn_width, btn_height, "QUIT!", DARK_RED, RED)
-        if clicked:
-            pygame.quit()
-            sys.exit()
-        pygame.display.update()
-
-        # FPS
-        clock.tick(FPS)
-
-    # start game again
-    game_loop()
+def place_car(car, car_img):
+    display.blit(car_img, (car.x, car.y))
 
 
 def message_display(msg):
@@ -165,16 +131,46 @@ def pause():
     pygame.mixer.music.unpause()
 
 
+def crash():
+    crashed = True
+    btn_width = 120
+    btn_height = 50
+    play_btn_x = WINDOW_WIDTH / 4
+    quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
+    play_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
+
+    message_display('You Crashed!')
+    pygame.mixer.music.stop()
+    pygame.mixer.Sound.play(crash_sound)
+
+    while crashed:
+        # event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # display
+        clicked = button(play_btn_x, play_btn_y, btn_width, btn_height, "Play Again!", DARK_GREEN, GREEN)
+        if clicked:
+            crashed = False
+        clicked = button(quit_btn_x, quit_btn_y, btn_width, btn_height, "QUIT!", DARK_RED, RED)
+        if clicked:
+            pygame.quit()
+            sys.exit()
+        pygame.display.update()
+
+        # FPS
+        clock.tick(FPS)
+
+    # start game again
+    game_loop()
+
+
 def game_loop():
     game_exit = False
-    car_x = WINDOW_WIDTH * 0.45
-    car_y = WINDOW_HEIGHT * 0.8
-    car_x_change = 0
-    block_x = random.randint(0, WINDOW_WIDTH)
-    block_y = -WINDOW_HEIGHT
-    block_speed = 7
-    block_width = 100
-    block_height = 100
+    car1 = Car(0.45, 0.85, 0)
+    block_black_1 = Block(100, 100, BLACK, random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 7)
     score = 0
     level = 1
 
@@ -187,41 +183,41 @@ def game_loop():
                 game_exit = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    car_x_change = -5
+                    car1.x_move = -5
                 elif event.key == pygame.K_RIGHT:
-                    car_x_change = 5
+                    car1.x_move = 5
                 elif event.key == pygame.K_p:
                     pause()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT:
-                    car_x_change = 0
+                    car1.x_move = 0
 
         # movement variable
-        car_x += car_x_change
-        block_y += utils.calculate_speed(block_speed, level)
+        car1.change_x()
+        block_black_1.speed = utils.calculate_speed(block_black_1.speed, level)
+        block_black_1.change_y()
 
         # movement variable handling
         # car crashes on edge
-        if car_x < 0 or car_x > (WINDOW_WIDTH - car.get_rect().width):
+        if car1.x < 0 or car1.x > (WINDOW_WIDTH - car1_img.get_rect().width):
             crash()
             game_exit = True
         # car crashes on blocks
-        if car_y < block_y + block_height:
-            if block_x < car_x < block_x + block_width or block_x < car_x + car.get_rect().width < block_x + block_width:
-                crash()
-                game_exit = True
+        if utils.crash_detection(car1, car1_img, block_black_1):
+            crash()
+            game_exit = True
         # block passes car, initialize block position
-        if block_y > WINDOW_HEIGHT:
-            block_y = -WINDOW_HEIGHT
-            block_x = random.randint(0, WINDOW_WIDTH)
+        if block_black_1.y > WINDOW_HEIGHT:
+            block_black_1.y = -WINDOW_HEIGHT
+            block_black_1.x = random.randint(0, WINDOW_WIDTH)
             score += 1
             level = utils.calculate_level(score)
 
         # display
         display.fill(WHITE)
-        place_car(car_x, car_y)
-        draw_block(block_x, block_y, block_width, block_height, BLACK)
+        place_car(car1, car1_img)
+        draw_block(block_black_1)
         display_score(score)
         display_level(level)
         pygame.display.update()
