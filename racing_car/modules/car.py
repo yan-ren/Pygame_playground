@@ -2,7 +2,8 @@ from modules import constants
 
 
 class Car:
-    def __init__(self, x=0.45, y=0.8, x_move=0):
+    def __init__(self, img, x=0.45, y=0.8, x_move=0):
+        self.img = img
         self.x = constants.WINDOW_WIDTH * x
         self.y = constants.WINDOW_HEIGHT * y
         self.x_move = x_move
@@ -16,4 +17,7 @@ class Car:
 
     def change_x(self):
         self.x += self.x_move
+
+    def get_width(self):
+        return self.img.get_rect().width
 

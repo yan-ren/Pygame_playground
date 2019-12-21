@@ -19,12 +19,12 @@ def calculate_speed(current_speed, level):
     if current_speed > constants.MAX_SPEED:
         return constants.MAX_SPEED
     else:
-        return current_speed * level
+        return current_speed + level * 2
 
 
-def crash_detection(car, car_img, block):
-    if car.y < block.y + block.height:
-        if block.x < car.x < block.x + block.width or \
-                block.x < car.x + car_img.get_rect().width < block.x + block.width:
+def crash_detection(car, block):
+    if car.y < block.y + block.get_height():
+        if block.x < car.x < block.x + block.get_width() or \
+                block.x < car.x + car.get_width() < block.x + block.get_width():
             return True
     return False
