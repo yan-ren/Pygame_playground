@@ -3,15 +3,15 @@ from modules import constants
 
 
 def calculate_level(score):
-    if score < 10:
+    if score < constants.LEVEL_MAP[1]:
         return 1
-    elif 10 <= score < 20:
+    elif constants.LEVEL_MAP[1] <= score < constants.LEVEL_MAP[2]:
         return 2
-    elif 20 <= score < 30:
+    elif constants.LEVEL_MAP[2] <= score < constants.LEVEL_MAP[3]:
         return 3
-    elif 30 <= score < 40:
+    elif constants.LEVEL_MAP[3] <= score < constants.LEVEL_MAP[4]:
         return 4
-    elif 40 <= score:
+    elif constants.LEVEL_MAP[4] <= score:
         return 5
 
 
@@ -28,3 +28,18 @@ def crash_detection(car, block):
                 block.x < car.x + car.get_width() < block.x + block.get_width():
             return True
     return False
+
+
+def level_up(score):
+    if score in constants.LEVEL_MAP.values():
+        return True
+    return False
+
+
+def calculate_time(start_time, end_time):
+    time = end_time - start_time
+    minutes = str(time // 60000).zfill(2)
+    second = str((time % 60000) // 1000).zfill(2)
+    millisecond = str(time % 1000).zfill(3)
+    return "%s:%s:%s" % (minutes, second, millisecond)
+

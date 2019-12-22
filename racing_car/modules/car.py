@@ -9,11 +9,13 @@ class Car:
         self.x_move = x_move
         self.x_start = self.x
         self.y_start = self.y
+        self.life = 3
 
     def restore(self):
         self.x = self.x_start
         self.y = self.y_start
         self.x_move = 0
+        self.life = 3
 
     def change_x(self):
         self.x += self.x_move

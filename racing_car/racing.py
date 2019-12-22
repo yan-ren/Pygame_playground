@@ -15,6 +15,7 @@ pygame.display.set_icon(pygame.image.load('img/car_icon.png').convert_alpha())
 # Global Variable
 crash_sound = pygame.mixer.Sound("audio/Crash.wav")
 clock = pygame.time.Clock()
+start_time = None
 # key lock
 left_key_pressed = False
 right_key_pressed = False
@@ -31,10 +32,22 @@ def display_score(score):
     display.blit(text, (0, 0))
 
 
+def display_time(time):
+    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
+    text = font.render("Time: " + str(time), True, BLACK)
+    display.blit(text, (0, 0))
+
+
 def display_level(level):
     font = pygame.font.Font("fonts/freesansbold.ttf", 25)
     text = font.render("Level: " + str(level), True, BLACK)
     display.blit(text, (0, 30))
+
+
+def display_life(life):
+    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
+    text = font.render("Life: " + str(life), True, BLACK)
+    display.blit(text, (0, 60))
 
 
 def display_block(blocks):
@@ -190,6 +203,7 @@ def game_init():
             b.restore()
     globals()['score'] = 0
     globals()['level'] = 1
+    globals()['start_time'] = pygame.time.get_ticks()
 
     pygame.mixer.music.play(-1)
 
@@ -205,9 +219,9 @@ def game_loop():
     game_init()
     global left_key_pressed, right_key_pressed, score, level, car1, block_list
     game_exit = False
-    level_up = False
 
     while not game_exit:
+        level_up = False
         # event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -242,11 +256,9 @@ def game_loop():
             b.change_y()
 
         # movement variable handling
-        # car crashes on edge
+        # car stops on edge
         if car1.x < 0 or car1.x > (WINDOW_WIDTH - car1.get_width()):
-            # frame_crash() return False, restart game
-            if not frame_crash():
-                game_init()
+            car1.x_move = 0
         # car crashes on blocks
         if check_crash(car1, block_list):
             # frame_crash() return False, restart game
@@ -259,13 +271,22 @@ def game_loop():
                 b.x = random.randint(0, WINDOW_WIDTH)
                 score += 1
                 level = utils.calculate_level(score)
+                level_up = utils.level_up(score)
+        # level up change
+        if level_up:
+            for b in block_list:
+                b.speed = utils.calculate_speed(b.speed, level)
+        # capture time
+        current_time = pygame.time.get_ticks()
 
         # display
         display.fill(WHITE)
         display_car(car1)
         display_block(block_list)
-        display_score(score)
+        # display_score(score)
+        display_time(utils.calculate_time(start_time, current_time))
         display_level(level)
+        display_life(car1.life)
         pygame.display.update()
 
         # FPS

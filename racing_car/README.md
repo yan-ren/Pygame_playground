@@ -10,11 +10,8 @@ A simple racing car game written in Python and PyGame
 - mp3 format is not working on Ubuntu, use wav instead
 
 ## Further Feature
-- introduce levels
-    - increase speed depends on level
-    - more functional blocks on different level, e.g some blocks get more score or slow the speed
-- various blocks, e.g. picture, color, size, functions
 - add life
+- various blocks, e.g. picture, color, size, functions
 - add two player mode
 - add highest score record
 
