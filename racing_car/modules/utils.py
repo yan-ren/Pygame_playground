@@ -36,8 +36,8 @@ def level_up(score):
     return False
 
 
-def calculate_time(start_time, end_time):
-    time = end_time - start_time
+def convert_time(time):
+    """Convert time in millisecond to string format MM:SS:MS"""
     minutes = str(time // 60000).zfill(2)
     second = str((time % 60000) // 1000).zfill(2)
     millisecond = str(time % 1000).zfill(3)

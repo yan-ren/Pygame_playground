@@ -16,14 +16,18 @@ pygame.display.set_icon(pygame.image.load('img/car_icon.png').convert_alpha())
 crash_sound = pygame.mixer.Sound("audio/Crash.wav")
 clock = pygame.time.Clock()
 start_time = None
-# key lock
-left_key_pressed = False
-right_key_pressed = False
 # game object
 car1 = None
 block_list = []
 score = 0
 level = 1
+highest_record = 0
+
+
+def display_record(record):
+    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
+    text = font.render("Record: " + str(record), True, BLACK)
+    display.blit(text, (WINDOW_WIDTH - 240, 0))
 
 
 def display_score(score):
@@ -59,13 +63,12 @@ def display_car(car):
     display.blit(car.img, (car.x, car.y))
 
 
-def display_message(msg):
-    text_style = pygame.font.Font('fonts/freesansbold.ttf', 100)
+def display_message(msg, font_size, x_pos, y_pos):
+    text_style = pygame.font.Font('fonts/freesansbold.ttf', font_size)
     text_surf = text_style.render(msg, True, BLACK)
     text_rect = text_surf.get_rect()
-    text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+    text_rect.center = (x_pos, y_pos)
     display.blit(text_surf, text_rect)
-    pygame.display.update()
 
 
 def display_button(x, y, width, height, text, normal_color, hover_color):
@@ -103,11 +106,7 @@ def frame_start_menu():
 
         # display
         display.fill(WHITE)
-        text_style = pygame.font.Font('fonts/freesansbold.ttf', 60)
-        text_surf = text_style.render("A Racing Car Game", True, BLACK)
-        text_rect = text_surf.get_rect()
-        text_rect.center = (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
-        display.blit(text_surf, text_rect)
+        display_message("A Racing Car Game", 60, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
         clicked = display_button(start_btn_x, start_btn_y, btn_width, btn_height, "GO!", DARK_GREEN, GREEN)
         if clicked:
             start_game = True
@@ -130,7 +129,6 @@ def frame_pause():
     pause_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
 
     pygame.mixer.music.pause()
-    display_message("Paused!")
 
     while paused:
         # event handling
@@ -147,6 +145,8 @@ def frame_pause():
         if clicked:
             pygame.quit()
             sys.exit()
+
+        display_message("Paused!", 100, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
         pygame.display.update()
 
         # FPS
@@ -155,7 +155,9 @@ def frame_pause():
     pygame.mixer.music.unpause()
 
 
-def frame_crash():
+def frame_crash(current_time):
+    global highest_record, start_time
+
     crashed = True
     btn_width = 120
     btn_height = 50
@@ -163,7 +165,7 @@ def frame_crash():
     quit_btn_x = WINDOW_WIDTH - WINDOW_WIDTH / 4 - btn_width
     play_btn_y = quit_btn_y = WINDOW_HEIGHT / 6 * 4
 
-    display_message('You Crashed!')
+    # stop bg music, and play crash sound
     pygame.mixer.music.stop()
     pygame.mixer.Sound.play(crash_sound)
 
@@ -174,6 +176,10 @@ def frame_crash():
                 pygame.quit()
                 sys.exit()
 
+        # update highest record
+        if current_time - start_time > highest_record:
+            highest_record = current_time - start_time
+
         # display
         clicked = display_button(play_btn_x, play_btn_y, btn_width, btn_height, "Play Again!", DARK_GREEN, GREEN)
         if clicked:
@@ -183,19 +189,85 @@ def frame_crash():
         if clicked:
             pygame.quit()
             sys.exit()
+
+        display_message('You Crashed!', 100, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
         pygame.display.update()
 
         # FPS
         clock.tick(FPS)
 
 
+def frame_countdown():
+    global car1
+    left_key_pressed = right_key_pressed = False
+    start_tick = pygame.time.get_ticks()
+    # this list holds display words, one word shows 1s, need '' at the beginning for second element can show for 1s
+    countdown_text = ['', 'Game Start!', '1', '2', '3']
+    current_display = countdown_text.pop()
+
+    while len(countdown_text) != 0:
+        # event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    left_key_pressed = True
+                    car1.x_move = -5
+                elif event.key == pygame.K_RIGHT:
+                    right_key_pressed = True
+                    car1.x_move = 5
+                elif event.key == pygame.K_p:
+                    frame_pause()
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_RIGHT and left_key_pressed:
+                    right_key_pressed = False
+                    car1.x_move = -5
+                elif event.key == pygame.K_RIGHT:
+                    right_key_pressed = False
+                    car1.x_move = 0
+                if event.key == pygame.K_LEFT and right_key_pressed:
+                    left_key_pressed = False
+                    car1.x_move = 5
+                elif event.key == pygame.K_LEFT:
+                    left_key_pressed = False
+                    car1.x_move = 0
+
+        # movement variable handling
+        # car stops on edge
+        if car1.x < 0 or car1.x > (WINDOW_WIDTH - car1.get_width()):
+            car1.x_move = 0
+        car1.change_x()
+
+        # countdown ticker
+        current_tick = pygame.time.get_ticks()
+        if (current_tick - start_tick) / 1000 > 1:
+            start_tick = current_tick
+            current_display = countdown_text.pop()
+
+        # display
+        display.fill(WHITE)
+        display_message(current_display, 100, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2)
+        display_car(car1)
+        display_record(utils.convert_time(highest_record))
+        pygame.display.update()
+
+        # FPS
+        clock.tick(FPS)
+
+    # set global start timer
+    globals()['start_time'] = pygame.time.get_ticks()
+
+
 def game_init():
-    globals()['left_key_pressed'] = False
-    globals()['right_key_pressed'] = False
     globals()['car1'] = Car(pygame.image.load('img/car2.png').convert_alpha(), 0.45, 0.85, 0)
     if len(globals()['block_list']) == 0:
         globals()['block_list'].append(Block(pygame.image.load('img/brick-1.png').convert_alpha(),
                                              random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 3))
+        globals()['block_list'].append(Block(pygame.image.load('img/brick-1.png').convert_alpha(),
+                                             random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
         globals()['block_list'].append(Block(pygame.image.load('img/brick-1.png').convert_alpha(),
                                              random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 7))
     else:
@@ -203,8 +275,8 @@ def game_init():
             b.restore()
     globals()['score'] = 0
     globals()['level'] = 1
-    globals()['start_time'] = pygame.time.get_ticks()
 
+    frame_countdown()
     pygame.mixer.music.play(-1)
 
 
@@ -220,7 +292,10 @@ def check_crash(car, blocks):
 
 def game_loop():
     game_init()
-    global left_key_pressed, right_key_pressed, score, level, car1, block_list
+    global score, level, car1, block_list
+    # key lock
+    left_key_pressed = False
+    right_key_pressed = False
     game_exit = False
 
     while not game_exit:
@@ -265,7 +340,7 @@ def game_loop():
         # car crashes on blocks
         if check_crash(car1, block_list):
             car1.life = car1.life - 1
-            if car1.life < 0 and not frame_crash():
+            if car1.life < 0 and not frame_crash(current_time):
                 # frame_crash() return False, restart game
                 game_init()
         # block passes car, initialize block position
@@ -288,9 +363,10 @@ def game_loop():
         display_car(car1)
         display_block(block_list)
         # display_score(score)
-        display_time(utils.calculate_time(start_time, current_time))
+        display_time(utils.convert_time(current_time - start_time))
         display_level(level)
         display_life(car1.life)
+        display_record(utils.convert_time(highest_record))
         pygame.display.update()
 
         # FPS

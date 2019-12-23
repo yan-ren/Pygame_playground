@@ -8,13 +8,15 @@ A simple racing car game written in Python and PyGame
 
 ## Implementation Notes
 - mp3 format is not working on Ubuntu, use wav instead
+- Python3.5 crash when calling pygame.mixer.Sound.play()
+    - issue: https://bugs.python.org/issue20891
+    - solution: use Python3.7
 
 ## Further Feature
-- add life
-- various blocks, e.g. picture, color, size, functions
 - add two player mode
-- add highest score record
+- various blocks, e.g. picture, color, size, functions
 
 ## Deployment Idea
+- add state diagram
 - convert to executable for installing
 - or even perfect, deploy online
