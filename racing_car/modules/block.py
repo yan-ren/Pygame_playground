@@ -10,6 +10,7 @@ class Block:
         self.initial_y = y
         self.speed = speed
         self.initial_speed = speed
+        self.attached = None
 
     def change_y(self):
         self.y += self.speed
@@ -27,3 +28,4 @@ class Block:
         self.speed = self.initial_speed
         self.y = self.initial_y
         self.random_x()
+        self.attached = None

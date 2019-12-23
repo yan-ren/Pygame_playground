@@ -210,8 +210,11 @@ def game_init():
 
 def check_crash(car, blocks):
     for b in blocks:
-        if utils.crash_detection(car, b):
+        if utils.crash_detection(car, b) and b.attached is None:
+            b.attached = car
             return True
+        elif not utils.crash_detection(car, b):
+            b.attached = None
     return False
 
 
@@ -261,8 +264,9 @@ def game_loop():
             car1.x_move = 0
         # car crashes on blocks
         if check_crash(car1, block_list):
-            # frame_crash() return False, restart game
-            if not frame_crash():
+            car1.life = car1.life - 1
+            if car1.life < 0 and not frame_crash():
+                # frame_crash() return False, restart game
                 game_init()
         # block passes car, initialize block position
         for b in block_list:
