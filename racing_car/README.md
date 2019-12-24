@@ -14,6 +14,10 @@ A simple racing car game written in Python and PyGame
 
 ## Further Feature
 - add two player mode
+    - check crash need to support two player mode
+    - life for two car
+    - level
+    - cars cannot cross over    
 - various blocks, e.g. picture, color, size, functions
 
 ## Deployment Idea

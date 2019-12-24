@@ -2,10 +2,10 @@ from modules import constants
 
 
 class Car:
-    def __init__(self, img, x=0.45, y=0.8, x_move=0):
+    def __init__(self, img, x=constants.WINDOW_WIDTH * 0.45, y=constants.WINDOW_HEIGHT * 0.8, x_move=0):
         self.img = img
-        self.x = constants.WINDOW_WIDTH * x
-        self.y = constants.WINDOW_HEIGHT * y
+        self.x = x
+        self.y = y
         self.x_move = x_move
         self.x_start = self.x
         self.y_start = self.y
