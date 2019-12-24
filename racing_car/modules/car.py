@@ -2,7 +2,8 @@ from modules import constants
 
 
 class Car:
-    def __init__(self, img, x=constants.WINDOW_WIDTH * 0.45, y=constants.WINDOW_HEIGHT * 0.8, x_move=0):
+    def __init__(self, id, img, x=constants.WINDOW_WIDTH * 0.45, y=constants.WINDOW_HEIGHT * 0.8, x_move=0):
+        self.id = id
         self.img = img
         self.x = x
         self.y = y
@@ -23,3 +24,8 @@ class Car:
     def get_width(self):
         return self.img.get_rect().width
 
+    def __eq__(self, other):
+        return self.id == other.id
+
+    def __ne__(self, other):
+        return self.id != other.id

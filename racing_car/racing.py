@@ -25,34 +25,10 @@ level = 1
 highest_record = 0
 
 
-def display_record(record):
-    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
-    text = font.render("Record: " + str(record), True, BLACK)
-    display.blit(text, (WINDOW_WIDTH - 240, 0))
-
-
-def display_score(score):
-    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
-    text = font.render("Score: " + str(score), True, BLACK)
-    display.blit(text, (0, 0))
-
-
-def display_time(time):
-    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
-    text = font.render("Time: " + str(time), True, BLACK)
-    display.blit(text, (0, 0))
-
-
-def display_level(level):
-    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
-    text = font.render("Level: " + str(level), True, BLACK)
-    display.blit(text, (0, 30))
-
-
-def display_life(life):
-    font = pygame.font.Font("fonts/freesansbold.ttf", 25)
-    text = font.render("Life: " + str(life), True, BLACK)
-    display.blit(text, (0, 60))
+def display_text_label(content, font_size, x_pos, y_pos):
+    font = pygame.font.Font("fonts/freesansbold.ttf", font_size)
+    text = font.render(content, True, BLACK)
+    display.blit(text, (x_pos, y_pos))
 
 
 def display_block(blocks):
@@ -306,7 +282,7 @@ def frame_countdown(game_type):
         display_car(car1)
         if game_type == DOUBLE_MODE:
             display_car(car2)
-        display_record(utils.convert_time(highest_record))
+        display_text_label("Record: " + utils.convert_time(highest_record), 25, WINDOW_WIDTH - 240, 0)
         pygame.display.update()
 
         # FPS
@@ -318,11 +294,11 @@ def frame_countdown(game_type):
 
 def game_init(game_type):
     if game_type == SINGLE_MODE:
-        globals()['car1'] = Car(pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
-        globals()['car2'] = Car(pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car1'] = Car(1, pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car2'] = Car(2, pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
     elif game_type == DOUBLE_MODE:
-        globals()['car1'] = Car(pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.75, WINDOW_HEIGHT * 0.85, 0)
-        globals()['car2'] = Car(pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.25, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car1'] = Car(1, pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.75, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car2'] = Car(2, pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.25, WINDOW_HEIGHT * 0.85, 0)
     if len(globals()['block_list']) == 0:
         globals()['block_list'].append(Block(pygame.image.load('img/brick-1.png').convert_alpha(),
                                              random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
@@ -342,11 +318,12 @@ def game_init(game_type):
 
 def check_crash(car, blocks):
     for b in blocks:
-        if utils.crash_detection(car, b) and b.attached is None:
-            b.attached = car
+        if utils.crash_detection(car, b) and car not in b.attached:
+            b.attached.append(car)
             return True
         elif not utils.crash_detection(car, b):
-            b.attached = None
+            if car in b.attached:
+                b.attached.remove(car)
     return False
 
 
@@ -421,11 +398,10 @@ def single_game_loop():
         display.fill(WHITE)
         display_car(car1)
         display_block(block_list)
-        # display_score(score)
-        display_time(utils.convert_time(current_time - start_time))
-        display_level(level)
-        display_life(car1.life)
-        display_record(utils.convert_time(highest_record))
+        display_text_label("Time: " + utils.convert_time(current_time - start_time), 25, 0, 0)
+        display_text_label("Level: " + level, 25, 0, 30)
+        display_text_label("Life: " + car1.life, 25, 0, 60)
+        display_text_label("Record: " + utils.convert_time(highest_record), 25, WINDOW_WIDTH - 240, 0)
         pygame.display.update()
 
         # FPS
@@ -534,13 +510,19 @@ def double_game_loop():
         display.fill(WHITE)
         if display_car1:
             display_car(car1)
+            display_text_label("Life: " + str(car1.life), 25, 0, 60)
+        else:
+            display_text_label("Life: 0", 25, 0, 60)
+
         if display_car2:
             display_car(car2)
+            display_text_label("Life: " + str(car2.life), 25, WINDOW_WIDTH - 240, 60)
+        else:
+            display_text_label("Life: 0", 25, WINDOW_WIDTH - 240, 60)
         display_block(block_list)
-        display_time(utils.convert_time(current_time - start_time))
-        display_level(level)
-        display_life(car1.life)
-        display_record(utils.convert_time(highest_record))
+        display_text_label("Time: " + utils.convert_time(current_time - start_time), 25, 0, 0)
+        display_text_label("Level: " + str(level), 25, WINDOW_WIDTH / 2, 0)
+        display_text_label("Record: " + utils.convert_time(highest_record), 25, WINDOW_WIDTH - 240, 0)
         pygame.display.update()
 
         # FPS
