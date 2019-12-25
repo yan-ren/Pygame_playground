@@ -11,9 +11,14 @@ pygame.mixer.music.load("audio/HandClap.wav")
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('Race Car')
 pygame.display.set_icon(pygame.image.load('img/car_icon.png').convert_alpha())
+car1_img = pygame.image.load('img/car1.png').convert_alpha()
+car2_img = pygame.image.load('img/car2.png').convert_alpha()
+explosion_img = pygame.image.load('img/explosion.png').convert_alpha()
+fire_img = pygame.image.load('img/fire.png').convert_alpha()
 
 # Global Variable
 crash_sound = pygame.mixer.Sound("audio/Crash.wav")
+horn_sound = pygame.mixer.Sound("audio/horn.wav")
 clock = pygame.time.Clock()
 start_time = None
 # game object
@@ -33,8 +38,10 @@ def display_text_label(content, font_size, x_pos, y_pos):
 
 def display_block(blocks):
     for b in blocks:
-        display.blit(b.img, (b.x, b.y))
-
+        if len(b.attached) == 0:
+            display.blit(b.img, (b.x, b.y))
+        else:
+            display.blit(explosion_img, (b.x, b.y))
 
 def display_car(car):
     display.blit(car.img, (car.x, car.y))
@@ -261,15 +268,40 @@ def frame_countdown(game_type):
                     car2_left_key_pressed = False
                     car2.x_move = 0
 
-        car1.change_x()
-        car2.change_x()
         # movement variable handling
         # car stops on edge
-        if car1.x < 0 or car1.x > (WINDOW_WIDTH - car1.get_width()):
+        if car1.x < 0:
             car1.x_move = 0
-        if car2.x < 0 or car2.x > (WINDOW_WIDTH - car2.get_width()):
+            car1.x = 0
+        if car1.x > (WINDOW_WIDTH - car1.get_width()):
+            car1.x_move = 0
+            car1.x = WINDOW_WIDTH - car1.get_width()
+        if car2.x < 0:
             car2.x_move = 0
+            car2.x = 0
+        if car2.x > (WINDOW_WIDTH - car2.get_width()):
+            car2.x_move = 0
+            car2.x = WINDOW_WIDTH - car2.get_width()
+        # stop two cars crossing
+        if game_type == DOUBLE_MODE:
+            if car2.x + car2.get_width() > car1.x:
+                if car1_left_key_pressed and car2_right_key_pressed:
+                    car1_stop = car2.x + car2.get_width()
+                    car2_stop = car1.x - car2.get_width()
+                    car1.x = car1_stop
+                    car2.x = car2_stop
+                # car1 is pushing car2 to the left
+                elif car1_left_key_pressed:
+                    car2.x = car1.x - car2.get_width()
+                # car2 is pushing car1 to the right
+                elif car2_right_key_pressed:
+                    car1.x = car2.x + car2.get_width()
 
+        # change movement variable
+        car1.change_x()
+        car2.change_x()
+
+        # other attribute handling
         # countdown ticker
         current_tick = pygame.time.get_ticks()
         if (current_tick - start_tick) / 1000 > 1:
@@ -294,11 +326,11 @@ def frame_countdown(game_type):
 
 def game_init(game_type):
     if game_type == SINGLE_MODE:
-        globals()['car1'] = Car(1, pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
-        globals()['car2'] = Car(2, pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car1'] = Car(1, car1_img, WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car2'] = Car(2, car2_img, WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
     elif game_type == DOUBLE_MODE:
-        globals()['car1'] = Car(1, pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.75, WINDOW_HEIGHT * 0.85, 0)
-        globals()['car2'] = Car(2, pygame.image.load('img/car2.png').convert_alpha(), WINDOW_WIDTH * 0.25, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car1'] = Car(1, car1_img, WINDOW_WIDTH * 0.75, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car2'] = Car(2, car2_img, WINDOW_WIDTH * 0.25, WINDOW_HEIGHT * 0.85, 0)
     if len(globals()['block_list']) == 0:
         globals()['block_list'].append(Block(pygame.image.load('img/brick-1.png').convert_alpha(),
                                              random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
@@ -365,20 +397,14 @@ def single_game_loop():
                     left_key_pressed = False
                     car1.x_move = 0
 
-        # movement variable
-        car1.change_x()
-        for b in block_list:
-            b.change_y()
-
         # movement variable handling
         # car stops on edge
-        if car1.x < 0 or car1.x > (WINDOW_WIDTH - car1.get_width()):
+        if car1.x < 0:
             car1.x_move = 0
-        # car crashes on blocks
-        if check_crash(car1, block_list):
-            car1.life = car1.life - 1
-            if car1.life < 0:
-                return current_time
+            car1.x = 0
+        if car1.x > (WINDOW_WIDTH - car1.get_width()):
+            car1.x_move = 0
+            car1.x = WINDOW_WIDTH - car1.get_width()
         # block passes car, initialize block position
         for b in block_list:
             if b.y > WINDOW_HEIGHT:
@@ -387,6 +413,19 @@ def single_game_loop():
                 score += 1
                 level = utils.calculate_level(score)
                 level_up = utils.level_up(score)
+
+        # change movement variable
+        car1.change_x()
+        for b in block_list:
+            b.change_y()
+
+        # other attributes handling
+        # car crashes on blocks
+        if check_crash(car1, block_list):
+            car1.life = car1.life - 1
+            pygame.mixer.Sound.play(crash_sound)
+            if car1.life < 0:
+                return current_time
         # level up change
         if level_up:
             for b in block_list:
@@ -399,8 +438,8 @@ def single_game_loop():
         display_car(car1)
         display_block(block_list)
         display_text_label("Time: " + utils.convert_time(current_time - start_time), 25, 0, 0)
-        display_text_label("Level: " + level, 25, 0, 30)
-        display_text_label("Life: " + car1.life, 25, 0, 60)
+        display_text_label("Level: " + str(level), 25, 0, 30)
+        display_text_label("Life: " + str(car1.life), 25, 0, 60)
         display_text_label("Record: " + utils.convert_time(highest_record), 25, WINDOW_WIDTH - 240, 0)
         pygame.display.update()
 
@@ -410,6 +449,8 @@ def single_game_loop():
 
 def double_game_loop():
     global score, level, car1, car2, block_list
+    car1.restore()
+    car2.restore()
     # key lock
     car1_left_key_pressed = False
     car1_right_key_pressed = False
@@ -422,6 +463,7 @@ def double_game_loop():
 
     while not game_exit:
         level_up = False
+        display_fire = False
         # event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -468,24 +510,49 @@ def double_game_loop():
                     car2_left_key_pressed = False
                     car2.x_move = 0
 
-        # movement variable
+        # movement variable handling
+        # car stops on edge
+        if car1.x < 0:
+            car1.x_move = 0
+            car1.x = 0
+        if car1.x > (WINDOW_WIDTH - car1.get_width()):
+            car1.x_move = 0
+            car1.x = WINDOW_WIDTH - car1.get_width()
+        if car2.x < 0:
+            car2.x_move = 0
+            car2.x = 0
+        if car2.x > (WINDOW_WIDTH - car2.get_width()):
+            car2.x_move = 0
+            car2.x = WINDOW_WIDTH - car2.get_width()
+        # stop two cars crossing
+        if car2.x + car2.get_width() > car1.x:
+            if car1_left_key_pressed and car2_right_key_pressed and display_car1 and display_car2:
+                car1_stop = car2.x + car2.get_width()
+                car2_stop = car1.x - car2.get_width()
+                car1.x = car1_stop
+                car2.x = car2_stop
+                display_fire = True
+            # car1 is pushing car2 to the left
+            elif car1_left_key_pressed and display_car1:
+                car2.x = car1.x - car2.get_width()
+            # car2 is pushing car1 to the right
+            elif car2_right_key_pressed and display_car2:
+                car1.x = car2.x + car2.get_width()
+
+        # change movement variable
         car1.change_x()
         car2.change_x()
         for b in block_list:
             b.change_y()
 
-        # movement variable handling
-        # car stops on edge
-        if car1.x < 0 or car1.x > (WINDOW_WIDTH - car1.get_width()):
-            car1.x_move = 0
-        if car2.x < 0 or car2.x > (WINDOW_WIDTH - car2.get_width()):
-            car2.x_move = 0
         # car crashes on blocks
         if check_crash(car1, block_list):
+            pygame.mixer.Sound.play(crash_sound)
             car1.life = car1.life - 1
             if car1.life < 0:
                 display_car1 = False
         if check_crash(car2, block_list):
+            pygame.mixer.Sound.play(crash_sound)
             car2.life = car2.life - 1
             if car2.life < 0:
                 display_car2 = False
@@ -519,6 +586,10 @@ def double_game_loop():
             display_text_label("Life: " + str(car2.life), 25, WINDOW_WIDTH - 240, 60)
         else:
             display_text_label("Life: 0", 25, WINDOW_WIDTH - 240, 60)
+
+        if display_fire:
+            display.blit(fire_img, (car1_stop - fire_img.get_rect().width / 2,
+                                    WINDOW_HEIGHT * 0.85))
         display_block(block_list)
         display_text_label("Time: " + utils.convert_time(current_time - start_time), 25, 0, 0)
         display_text_label("Level: " + str(level), 25, WINDOW_WIDTH / 2, 0)
