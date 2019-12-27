@@ -16,7 +16,7 @@ A simple racing car game written in Python and PyGame
 - add two player mode
     - cars cannot cross over, can push each other
 - add forward and backward
-    - single mode support first
+    - double mode support
 - various blocks, e.g. picture, color, size, functions
 
 ## Deployment Idea

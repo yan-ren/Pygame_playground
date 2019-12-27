@@ -10,13 +10,13 @@ class Block:
         self.initial_y = y
         self.speed = speed
         self.initial_speed = speed
-        self.attached = []
+        self.crashed = False
 
     def change_y(self):
         self.y += self.speed
 
     def random_x(self):
-        self.x = random.randint(0, constants.WINDOW_WIDTH - self.img.get_rect().width / 2)
+        return random.randint(0, constants.WINDOW_WIDTH - self.img.get_rect().width / 2)
 
     def get_width(self):
         return self.img.get_rect().width
@@ -24,8 +24,11 @@ class Block:
     def get_height(self):
         return self.img.get_rect().height
 
-    def restore(self):
-        self.speed = self.initial_speed
-        self.y = self.initial_y
-        self.random_x()
-        self.attached = []
+    def get_height(self):
+        return self.img.get_rect().height
+
+    def set_to_top(self):
+        self.crashed = False
+        self.y = random.randint(-constants.WINDOW_HEIGHT, 0)
+        self.x = self.random_x()
+

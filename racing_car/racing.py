@@ -15,6 +15,7 @@ car1_img = pygame.image.load('img/car1.png').convert_alpha()
 car2_img = pygame.image.load('img/car2.png').convert_alpha()
 explosion_img = pygame.image.load('img/explosion.png').convert_alpha()
 fire_img = pygame.image.load('img/fire.png').convert_alpha()
+block1_img = pygame.image.load('img/brick-1.png').convert_alpha()
 
 # Global Variable
 crash_sound = pygame.mixer.Sound("audio/Crash.wav")
@@ -38,10 +39,11 @@ def display_text_label(content, font_size, x_pos, y_pos):
 
 def display_block(blocks):
     for b in blocks:
-        if len(b.attached) == 0:
+        if not b.crashed:
             display.blit(b.img, (b.x, b.y))
         else:
             display.blit(explosion_img, (b.x, b.y))
+
 
 def display_car(car):
     display.blit(car.img, (car.x, car.y))
@@ -326,21 +328,18 @@ def frame_countdown(game_type):
 
 def game_init(game_type):
     if game_type == SINGLE_MODE:
-        globals()['car1'] = Car(1, car1_img, WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
-        globals()['car2'] = Car(2, car2_img, WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85, 0)
+        globals()['car1'] = Car(1, car1_img, WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85)
+        globals()['car2'] = Car(2, car2_img, WINDOW_WIDTH * 0.45, WINDOW_HEIGHT * 0.85)
     elif game_type == DOUBLE_MODE:
-        globals()['car1'] = Car(1, car1_img, WINDOW_WIDTH * 0.75, WINDOW_HEIGHT * 0.85, 0)
-        globals()['car2'] = Car(2, car2_img, WINDOW_WIDTH * 0.25, WINDOW_HEIGHT * 0.85, 0)
-    if len(globals()['block_list']) == 0:
-        globals()['block_list'].append(Block(pygame.image.load('img/brick-1.png').convert_alpha(),
-                                             random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
-        globals()['block_list'].append(Block(pygame.image.load('img/brick-1.png').convert_alpha(),
-                                             random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
-        globals()['block_list'].append(Block(pygame.image.load('img/brick-1.png').convert_alpha(),
-                                             random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
-    else:
-        for b in globals()['block_list']:
-            b.restore()
+        globals()['car1'] = Car(1, car1_img, WINDOW_WIDTH * 0.75, WINDOW_HEIGHT * 0.85)
+        globals()['car2'] = Car(2, car2_img, WINDOW_WIDTH * 0.25, WINDOW_HEIGHT * 0.85)
+    globals()['block_list'].clear()
+    globals()['block_list'].append(Block(block1_img,
+                                         random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
+    globals()['block_list'].append(Block(block1_img,
+                                         random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
+    globals()['block_list'].append(Block(block1_img,
+                                         random.randint(0, WINDOW_WIDTH), -WINDOW_HEIGHT, 5))
     globals()['score'] = 0
     globals()['level'] = 1
 
@@ -350,12 +349,9 @@ def game_init(game_type):
 
 def check_crash(car, blocks):
     for b in blocks:
-        if utils.crash_detection(car, b) and car not in b.attached:
-            b.attached.append(car)
+        if utils.crash_detection(car, b) and not b.crashed:
+            b.crashed = True
             return True
-        elif not utils.crash_detection(car, b):
-            if car in b.attached:
-                b.attached.remove(car)
     return False
 
 
@@ -374,6 +370,7 @@ def single_game_loop():
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
+                # left right key
                 if event.key == pygame.K_LEFT:
                     left_key_pressed = True
                     car1.x_move = -5
@@ -382,8 +379,14 @@ def single_game_loop():
                     car1.x_move = 5
                 elif event.key == pygame.K_p:
                     frame_pause()
+                # up down key
+                if event.key == pygame.K_UP:
+                    car1.y_move = -5
+                elif event.key == pygame.K_DOWN:
+                    car1.y_move = 5
 
             if event.type == pygame.KEYUP:
+                # left right key
                 if event.key == pygame.K_RIGHT and left_key_pressed:
                     right_key_pressed = False
                     car1.x_move = -5
@@ -396,6 +399,9 @@ def single_game_loop():
                 elif event.key == pygame.K_LEFT:
                     left_key_pressed = False
                     car1.x_move = 0
+                # up down key
+                if event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    car1.y_move = 0
 
         # movement variable handling
         # car stops on edge
@@ -405,17 +411,23 @@ def single_game_loop():
         if car1.x > (WINDOW_WIDTH - car1.get_width()):
             car1.x_move = 0
             car1.x = WINDOW_WIDTH - car1.get_width()
-        # block passes car, initialize block position
+        if car1.y < 0:
+            car1.y_move = 0
+            car1.y = 0
+        if car1.y > (WINDOW_HEIGHT - car1.get_height()):
+            car1.y_move = 0
+            car1.y = WINDOW_HEIGHT - car1.get_height()
+        # block passes bottom, initialize block position
         for b in block_list:
             if b.y > WINDOW_HEIGHT:
-                b.y = random.randint(-WINDOW_HEIGHT, 0)
-                b.x = random.randint(0, WINDOW_WIDTH)
+                b.set_to_top()
                 score += 1
                 level = utils.calculate_level(score)
                 level_up = utils.level_up(score)
 
         # change movement variable
         car1.change_x()
+        car1.change_y()
         for b in block_list:
             b.change_y()
 

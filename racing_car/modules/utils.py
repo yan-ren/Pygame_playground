@@ -27,7 +27,9 @@ def crash_detection(car, block):
     if car.y < block.y + block.get_height():
         if block.x < car.x < block.x + block.get_width() or \
                 block.x < car.x + car.get_width() < block.x + block.get_width():
-            return True
+            if block.y < car.y < block.y + block.get_height() or \
+                    block.y < car.y + car.get_height() < block.y + block.get_height():
+                return True
     return False
 
 
