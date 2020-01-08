@@ -573,8 +573,7 @@ def double_game_loop():
         # block passes car, initialize block position
         for b in block_list:
             if b.y > WINDOW_HEIGHT:
-                b.y = random.randint(-WINDOW_HEIGHT, 0)
-                b.x = random.randint(0, WINDOW_WIDTH)
+                b.set_to_top()
                 score += 1
                 level = utils.calculate_level(score)
                 level_up = utils.level_up(score)
@@ -589,19 +588,18 @@ def double_game_loop():
         display.fill(WHITE)
         if display_car1:
             display_car(car1)
-            display_text_label("Life: " + str(car1.life), 25, 0, 60)
-        else:
-            display_text_label("Life: 0", 25, 0, 60)
-
-        if display_car2:
-            display_car(car2)
-            display_text_label("Life: " + str(car2.life), 25, WINDOW_WIDTH - 240, 60)
+            display_text_label("Life: " + str(car1.life), 25, WINDOW_WIDTH - 240, 60)
         else:
             display_text_label("Life: 0", 25, WINDOW_WIDTH - 240, 60)
 
+        if display_car2:
+            display_car(car2)
+            display_text_label("Life: " + str(car2.life), 25, 0, 60)
+        else:
+            display_text_label("Life: 0", 25, 0, 60)
+
         if display_fire:
-            display.blit(fire_img, (car1_stop - fire_img.get_rect().width / 2,
-                                    WINDOW_HEIGHT * 0.85))
+            display.blit(fire_img, (car1_stop - fire_img.get_rect().width / 2, WINDOW_HEIGHT * 0.85))
         display_block(block_list)
         display_text_label("Time: " + utils.convert_time(current_time - start_time), 25, 0, 0)
         display_text_label("Level: " + str(level), 25, WINDOW_WIDTH / 2, 0)
