@@ -2,7 +2,7 @@ language: python
 env:
   global:
     - PROJECT=racing_car
-    - TRAVIS_TAG=v0.0.1
+    - TRAVIS_TAG=racing_car-v0.0.1
 jobs:
   include:
   - stage: linux build

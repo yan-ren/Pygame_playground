@@ -21,5 +21,3 @@ A simple racing car game written in Python and PyGame
 
 ## Deployment Idea
 - add state diagram
-- convert to executable for installing
-- or even perfect, deploy online
