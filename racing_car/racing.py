@@ -5,12 +5,14 @@ from modules import utils
 from modules.car import Car
 from modules.block import Block
 
-
+# pygame settings
 pygame.init()
 pygame.mixer.music.load("audio/HandClap.wav")
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption('Race Car')
 pygame.display.set_icon(pygame.image.load('img/car_icon.png').convert_alpha())
+
+# load image
 car1_img = pygame.image.load('img/car1.png').convert_alpha()
 car2_img = pygame.image.load('img/car2.png').convert_alpha()
 explosion_img = pygame.image.load('img/explosion.png').convert_alpha()
@@ -19,10 +21,8 @@ block1_img = pygame.image.load('img/brick-1.png').convert_alpha()
 
 # Global Variable
 crash_sound = pygame.mixer.Sound("audio/Crash.wav")
-horn_sound = pygame.mixer.Sound("audio/horn.wav")
 clock = pygame.time.Clock()
 start_time = None
-# game object
 car1 = None
 car2 = None
 block_list = []
@@ -348,8 +348,20 @@ def game_init(game_type):
 
 
 def check_crash(car, blocks):
+    """method checks if one car crashes on one block"""
+
     for b in blocks:
         if utils.crash_detection(car, b) and not b.crashed:
+            b.crashed = True
+            return True
+    return False
+
+
+def check_two_cars_crash(car1, car2, blocks):
+    """method checks if two cars crash on the same block at the same time"""
+
+    for b in blocks:
+        if utils.crash_detection(car1, b) and utils.crash_detection(car2, b) and not b.crashed:
             b.crashed = True
             return True
     return False
@@ -484,43 +496,45 @@ def double_game_loop():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
                     frame_pause()
-                if event.key == pygame.K_LEFT:
+                if event.key == pygame.K_LEFT and display_car1:
                     car1_left_key_pressed = True
                     car1.x_move = -5
-                elif event.key == pygame.K_RIGHT:
+                elif event.key == pygame.K_RIGHT and display_car1:
                     car1_right_key_pressed = True
                     car1.x_move = 5
-                if event.key == pygame.K_a:
+                if event.key == pygame.K_a and display_car2:
                     car2_left_key_pressed = True
                     car2.x_move = -5
-                elif event.key == pygame.K_d:
+                elif event.key == pygame.K_d and display_car2:
                     car2_right_key_pressed = True
                     car2.x_move = 5
             if event.type == pygame.KEYUP:
-                if event.key == pygame.K_RIGHT and car1_left_key_pressed:
-                    car1_right_key_pressed = False
-                    car1.x_move = -5
-                elif event.key == pygame.K_RIGHT:
-                    car1_right_key_pressed = False
-                    car1.x_move = 0
-                if event.key == pygame.K_LEFT and car1_right_key_pressed:
-                    car1_left_key_pressed = False
-                    car1.x_move = 5
-                elif event.key == pygame.K_LEFT:
-                    car1_left_key_pressed = False
-                    car1.x_move = 0
-                if event.key == pygame.K_d and car2_left_key_pressed:
-                    car2_right_key_pressed = False
-                    car2.x_move = -5
-                elif event.key == pygame.K_d:
-                    car2_right_key_pressed = False
-                    car2.x_move = 0
-                if event.key == pygame.K_a and car2_right_key_pressed:
-                    car2_left_key_pressed = False
-                    car2.x_move = 5
-                elif event.key == pygame.K_a:
-                    car2_left_key_pressed = False
-                    car2.x_move = 0
+                if display_car1:
+                    if event.key == pygame.K_RIGHT and car1_left_key_pressed:
+                        car1_right_key_pressed = False
+                        car1.x_move = -5
+                    elif event.key == pygame.K_RIGHT and display_car1:
+                        car1_right_key_pressed = False
+                        car1.x_move = 0
+                    if event.key == pygame.K_LEFT and car1_right_key_pressed:
+                        car1_left_key_pressed = False
+                        car1.x_move = 5
+                    elif event.key == pygame.K_LEFT:
+                        car1_left_key_pressed = False
+                        car1.x_move = 0
+                if display_car2:
+                    if event.key == pygame.K_d and car2_left_key_pressed:
+                        car2_right_key_pressed = False
+                        car2.x_move = -5
+                    elif event.key == pygame.K_d:
+                        car2_right_key_pressed = False
+                        car2.x_move = 0
+                    if event.key == pygame.K_a and car2_right_key_pressed:
+                        car2_left_key_pressed = False
+                        car2.x_move = 5
+                    elif event.key == pygame.K_a:
+                        car2_left_key_pressed = False
+                        car2.x_move = 0
 
         # movement variable handling
         # car stops on edge
@@ -558,16 +572,20 @@ def double_game_loop():
             b.change_y()
 
         # car crashes on blocks
-        if check_crash(car1, block_list):
+        if check_two_cars_crash(car1, car2, block_list):
             pygame.mixer.Sound.play(crash_sound)
             car1.life = car1.life - 1
-            if car1.life < 0:
-                display_car1 = False
-        if check_crash(car2, block_list):
+            car2.life = car2.life - 1
+        elif check_crash(car1, block_list):
+            pygame.mixer.Sound.play(crash_sound)
+            car1.life = car1.life - 1
+        elif check_crash(car2, block_list):
             pygame.mixer.Sound.play(crash_sound)
             car2.life = car2.life - 1
-            if car2.life < 0:
-                display_car2 = False
+        if car1.life < 0:
+            display_car1 = False
+        if car2.life < 0:
+            display_car2 = False
         if not display_car1 and not display_car2:
             return current_time
         # block passes car, initialize block position
