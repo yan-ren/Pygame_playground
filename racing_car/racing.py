@@ -603,14 +603,14 @@ def double_game_loop():
             b.change_y()
 
         # car crashes on blocks
-        if check_two_cars_crash(car1, car2, block_list):
+        if display_car1 and display_car2 and check_two_cars_crash(car1, car2, block_list):
             pygame.mixer.Sound.play(crash_sound)
             car1.life = car1.life - 1
             car2.life = car2.life - 1
-        elif check_crash(car1, block_list):
+        elif display_car1 and check_crash(car1, block_list):
             pygame.mixer.Sound.play(crash_sound)
             car1.life = car1.life - 1
-        elif check_crash(car2, block_list):
+        elif display_car2 and check_crash(car2, block_list):
             pygame.mixer.Sound.play(crash_sound)
             car2.life = car2.life - 1
         if car1.life < 0:
