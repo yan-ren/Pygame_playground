@@ -1,5 +1,5 @@
 # Pygame Development
-[![Build Status](https://travis-ci.org/yan-ren/pygame_development.svg?branch=master)](https://travis-ci.org/yan-ren/pygame_development) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=PNBG2C3WK35YW&currency_code=CAD&source=url)
+[![Build Status](https://travis-ci.org/yan-ren/pygame-development.svg?branch=master)](https://travis-ci.org/yan-ren/pygame_development) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=PNBG2C3WK35YW&currency_code=CAD&source=url)
 
 This repository contains games written in Pygame library.
 
